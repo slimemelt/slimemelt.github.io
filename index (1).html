@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Yeeps Channel</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #000; color: #fff; font-family: system-ui, sans-serif; }
+      #player { width: 100%; height: 100%; object-fit: contain; background: #000; }
+      #overlay {
+        position: fixed; inset: 0; display: flex; flex-direction: column; gap: 12px;
+        align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.6);
+      }
+      #overlay.hidden { display: none; }
+      #playBtn {
+        font-size: 20px; padding: 14px 28px; border: 0; border-radius: 10px;
+        background: #5865f2; color: #fff; cursor: pointer;
+      }
+      #status { font-size: 14px; opacity: 0.8; min-height: 1.2em; text-align: center; padding: 0 16px; }
+    </style>
+  </head>
+  <body>
+    <video id="player" controls playsinline></video>
+    <div id="overlay">
+      <button id="playBtn">▶ Watch Yeeps Channel</button>
+      <div id="status">Loading…</div>
+    </div>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
