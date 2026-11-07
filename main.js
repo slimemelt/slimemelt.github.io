@@ -3,7 +3,7 @@ import Hls from "hls.js";
 
 // ---- Settings -------------------------------------------------------------
 const STREAM_HOST = "https://watch.mistlive.tv";
-const STREAM_PATH = "/hls/ypch/playlist.m3u8";
+const STREAM_PATH = "/hls/yeeps/playlist.m3u8";
 // Must match the URL mapping you add in the Discord Developer Portal:
 //   prefix "/mist"  ->  target "watch.mistlive.tv"
 const PROXY_PREFIX = "/.proxy/mist";
