@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@discord/embedded-app-sdk": "^1.0.0",
+    "@fontsource/londrina-solid": "^5.0.0",
     "hls.js": "^1.5.0"
   },
   "devDependencies": {
