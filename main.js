@@ -6,7 +6,7 @@ import "@fontsource/londrina-solid/900.css";
 
 // ---- Settings -------------------------------------------------------------
 const STREAM_HOST = "https://watch.mistlive.tv";
-const STREAM_PATH = "/hls/ypch/playlist.m3u8";
+const STREAM_PATH = "/hls/yeeps/playlist.m3u8";
 // Must match the URL mapping you add in the Discord Developer Portal:
 //   prefix "/mist"  ->  target "watch.mistlive.tv"
 const PROXY_PREFIX = "/.proxy/mist";
@@ -19,6 +19,7 @@ const inDiscord = params.has("frame_id");
 
 const video = document.getElementById("player");
 const overlay = document.getElementById("overlay");
+const loadingEl = document.getElementById("loading");
 const playBtn = document.getElementById("playBtn");
 const statusEl = document.getElementById("status");
 
@@ -27,6 +28,8 @@ const setStatus = (text) => { statusEl.textContent = text; };
 const setDebug = (text) => { debugEl.textContent = text; };
 // The gray diagnostic line stays hidden unless something goes wrong (or you add ?debug to the address)
 const revealDebug = () => debugEl.classList.add("show");
+// The website's loading screen stays up until the stream is ready, or until something goes wrong
+const doneLoading = () => loadingEl.classList.add("hidden");
 let streamReady = false;
 
 // One diagnostic line shown under the status, so a stuck page tells you why
@@ -42,6 +45,7 @@ async function start() {
     if (!CLIENT_ID) {
       setStatus("Missing VITE_DISCORD_CLIENT_ID. Add it to .env and rebuild.");
       revealDebug();
+      doneLoading();
       return;
     }
     setStatus("Connecting to Discord…");
@@ -57,6 +61,7 @@ async function start() {
     if (!streamReady) {
       setStatus("Still loading. The connection to the stream may be blocked.");
       revealDebug();
+      doneLoading();
     }
   }, 15000);
 
@@ -73,6 +78,7 @@ async function start() {
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
       streamReady = true;
       setStatus("");
+      doneLoading();
     });
     hls.on(Hls.Events.ERROR, (_event, data) => {
       const code = data.response && data.response.code ? ` / HTTP ${data.response.code}` : "";
@@ -86,6 +92,7 @@ async function start() {
         hls.recoverMediaError();
       } else {
         setStatus("Couldn't play the stream.");
+        doneLoading();
         hls.destroy();
       }
     });
@@ -95,8 +102,10 @@ async function start() {
     video.src = src; // Safari and iOS play HLS natively
     streamReady = true;
     setStatus("");
+    doneLoading();
   } else {
     setStatus("This device can't play HLS streams.");
+    doneLoading();
   }
 }
 
@@ -112,4 +121,5 @@ playBtn.addEventListener("click", () => {
 start().catch((err) => {
   setStatus(`Something went wrong: ${err.message}`);
   revealDebug();
+  doneLoading();
 });
