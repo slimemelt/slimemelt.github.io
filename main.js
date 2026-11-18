@@ -1,19 +1,13 @@
 import { DiscordSDK } from "@discord/embedded-app-sdk";
 import Hls from "hls.js";
-// Londrina Solid is bundled with the page (Discord blocks fonts loaded from other websites)
 import "@fontsource/londrina-solid/400.css";
 import "@fontsource/londrina-solid/900.css";
 
-// ---- Settings -------------------------------------------------------------
 const STREAM_HOST = "https://watch.mistlive.tv";
 const STREAM_PATH = "/hls/yeeps/playlist.m3u8";
-// Must match the URL mapping you add in the Discord Developer Portal:
-//   prefix "/mist"  ->  target "watch.mistlive.tv"
 const PROXY_PREFIX = "/.proxy/mist";
 const CLIENT_ID = import.meta.env.VITE_DISCORD_CLIENT_ID;
-// ---------------------------------------------------------------------------
 
-// Discord adds ?frame_id=... when it loads an Activity. Outside Discord we play directly (handy for testing).
 const params = new URLSearchParams(window.location.search);
 const inDiscord = params.has("frame_id");
 
@@ -26,13 +20,10 @@ const statusEl = document.getElementById("status");
 const debugEl = document.getElementById("debug");
 const setStatus = (text) => { statusEl.textContent = text; };
 const setDebug = (text) => { debugEl.textContent = text; };
-// The gray diagnostic line stays hidden unless something goes wrong (or you add ?debug to the address)
 const revealDebug = () => debugEl.classList.add("show");
-// The website's loading screen stays up until the stream is ready, or until something goes wrong
 const doneLoading = () => loadingEl.classList.add("hidden");
 let streamReady = false;
 
-// One diagnostic line shown under the status, so a stuck page tells you why
 const hasId = Boolean(CLIENT_ID);
 const hlsJs = Hls.isSupported();
 const nativeHls = Boolean(document.createElement("video").canPlayType("application/vnd.apple.mpegurl"));
@@ -50,13 +41,12 @@ async function start() {
     }
     setStatus("Connecting to Discord…");
     const sdk = new DiscordSDK(CLIENT_ID);
-    await sdk.ready(); // tells Discord the Activity finished loading
+    await sdk.ready();
   }
 
   const src = (inDiscord ? PROXY_PREFIX : STREAM_HOST) + STREAM_PATH;
   setStatus("Loading stream…");
   setDebug(`${baseDebug()} | stream: ${src}`);
-  // If nothing has loaded after a while, say so instead of sitting on "Loading…"
   setTimeout(() => {
     if (!streamReady) {
       setStatus("Still loading. The connection to the stream may be blocked.");
@@ -68,7 +58,6 @@ async function start() {
   if (Hls.isSupported()) {
     const hls = new Hls({
       liveSyncDurationCount: 3,
-      // If the playlist contains full https://watch.mistlive.tv/... links, send them through Discord's proxy too.
       xhrSetup: (xhr, url) => {
         if (inDiscord && url.startsWith(STREAM_HOST)) {
           xhr.open("GET", PROXY_PREFIX + url.slice(STREAM_HOST.length), true);
@@ -99,7 +88,7 @@ async function start() {
     hls.loadSource(src);
     hls.attachMedia(video);
   } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-    video.src = src; // Safari and iOS play HLS natively
+    video.src = src;
     streamReady = true;
     setStatus("");
     doneLoading();
